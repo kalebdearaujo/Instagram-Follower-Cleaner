@@ -496,7 +496,7 @@
             </div>
           </details>
           <div class="transfer"><button id="download" type="button">Download</button><button id="upload" type="button">Upload</button><input type="file" id="backupfile" accept="application/json,.json" hidden></div>
-          <div class="help">Doubts? <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">click here</a></div>
+          <div class="help">Doubts? <a href="https://github.com/kalebdearaujo/Instagram-Follower-Cleaner/blob/main/README.md" target="_blank" rel="noopener noreferrer">click here</a></div>
           <label><input type="checkbox" id="withoutfile"> Continue <span class="without">without</span> following.json</label>
           <label><input type="checkbox" id="sim"> Test mode (list only, no removal)</label>
           <div id="log"></div>
