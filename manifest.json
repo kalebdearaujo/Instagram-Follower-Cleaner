@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "IG Follower Cleaner",
+  "version": "1.0.3",
+  "description": "Gradually remove followers from your Instagram: scroll through the list, click Remove and confirm. Keeps who you already follow.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open IG Follower Cleaner"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.instagram.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
