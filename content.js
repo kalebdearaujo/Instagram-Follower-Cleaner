@@ -212,6 +212,34 @@
     return scroller.scrollTop > beforeTop + 2 || scroller.scrollHeight > beforeH + 2;
   }
 
+  /**
+   * Antes de declarar o fim da lista, força uma segunda leitura no fim do
+   * scroller. O Instagram pode demorar para carregar ou ignorar uma rolagem
+   * suave, mesmo ainda havendo mais perfis abaixo.
+   */
+  async function confirmEndOfList(dialog, scroller, keep, tried) {
+    const hasUnprocessedRow = () => {
+      const currentDialog = getFollowersDialog() || dialog;
+      return listRows(currentDialog).some((row) => !keep.has(row.user) && !tried.has(row.user));
+    };
+
+    // Força a posição final e dá tempo para a lista virtual carregar itens.
+    scroller.scrollTop = scroller.scrollHeight;
+    scroller.dispatchEvent(new Event('scroll', { bubbles: true }));
+    await wait(3500, '↕ checking for more accounts');
+    if (hasUnprocessedRow()) return false;
+
+    // Uma curta volta seguida de nova ida ao fim também dispara carregamento
+    // em versões do Instagram que só observam mudanças reais de posição.
+    scroller.scrollTop = Math.max(0, scroller.scrollTop - 240);
+    scroller.dispatchEvent(new Event('scroll', { bubbles: true }));
+    await wait(900);
+    scroller.scrollTop = scroller.scrollHeight;
+    scroller.dispatchEvent(new Event('scroll', { bubbles: true }));
+    await wait(3500, '↕ checking for more accounts');
+    return !hasUnprocessedRow();
+  }
+
   /** The "Remove follower?" dialog (never returns a button from a list row). */
   function findConfirmDialog() {
     const rowButtons = new Set();
@@ -407,8 +435,14 @@
       if (!moved) {
         endStrikes++;
         if (endStrikes >= 3) {
-          log('I reached the end of the list.');
-          break;
+          log('Checking once more before confirming the end of the list...');
+          const confirmed = await confirmEndOfList(dialog, scroller, keep, tried);
+          if (confirmed) {
+            log('I reached the end of the list.');
+            break;
+          }
+          log('More accounts loaded; continuing.');
+          endStrikes = 0;
         }
       } else {
         endStrikes = 0;
